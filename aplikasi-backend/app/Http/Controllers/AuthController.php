@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Requests\Auth\SignUpRequest;
 use App\Http\Requests\Auth\SignInRequest;
+use App\Http\Requests\Auth\SignOut;
+use App\Http\Requests\Auth\Request;
 use GrahamCampbell\ResultType\Success;
 
 class AuthController extends Controller
@@ -18,7 +20,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
-            'picture' => env('AVATAR_GENERATOR_URL') . $validatedt['name']
+            'picture' => env('AVATAR_GENERATOR_URL') . $validated['name']
         ]);
 
         $token = auth()->login($user);
@@ -73,7 +75,7 @@ class AuthController extends Controller
             return response()->json([
                 'meta' => [
                     'code' => 401,
-                    'status' => error,
+                    'status' => 'error',
                     'message' => 'Incorrect Email Or Password',
                 ],
                 'data' [],
@@ -85,7 +87,7 @@ class AuthController extends Controller
         return response()->json([
             'meta' => [
                 'code' => 200,
-                'status' => Success,
+                'status' => 'Success',
                 'message' => 'Signed In Successfully',
             ],
             'data' [
@@ -116,6 +118,33 @@ class AuthController extends Controller
             ],
             'data' => [],
 
+        ]);
+    }
+
+    public function refresh()
+    {
+        $user = auth()->user();
+        $token = auth()->fromUser($user);
+
+        return response()->json([
+            'meta' => [
+                'code' => 200,
+                'status' => 'Success',
+                'message' => 'Token Refreshed Successfully',
+
+            ],
+            'data' => [
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'picture' => $user->picture,
+                ],
+                'access_token' => [
+                    'token' => $token,
+                    'type' => 'Bearer',
+                    'expires_in' => strtotime('+' . auth()->factory()->getTTL() . ' minutes'),
+                ]
+            ],
         ]);
     }
 }

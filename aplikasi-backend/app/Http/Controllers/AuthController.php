@@ -101,7 +101,7 @@ class AuthController extends Controller
                     'type' => 'Bearer',
                     'expires_in' => strtotime('+' . auth()->factory()->getTTL() . ' minutes'),
                 ]
-            ],
+            ]
         ]);
     }
 
@@ -144,7 +144,7 @@ class AuthController extends Controller
                     'type' => 'Bearer',
                     'expires_in' => strtotime('+' . auth()->factory()->getTTL() . ' minutes'),
                 ]
-            ],
+            ]
         ]);
     }
 }

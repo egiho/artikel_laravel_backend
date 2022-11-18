@@ -10,6 +10,7 @@ use Str;
 use ImageKit\ImageKit;
 use App\Models\User;
 use App\Models\Article;
+use Error;
 
 class ArticleController extends Controller
 {
@@ -101,5 +102,53 @@ class ArticleController extends Controller
             ],
             'data' => [],
         ], 500);
+    }
+
+    public function show($id)
+    {
+        // get article berdasarkan id yang diberikan
+        // cek apakah berhasil get
+        // kalau artikel tidak berhasil di get maka kembalikan response not found
+        // jika article berhasil di get id user saat ini login
+        // cek apakah id user yg saat ini login sama dengan id user yang ada di article yang kita get
+        // jika tidak sama maka kembalikan response unauthorized
+        // jika sama kembalikan article success
+
+        $article = Article::with(['category', 'user:id,name,picture'])->find($id);
+
+        if ($article)
+        {
+            $userId = auth()->id();
+
+            if ($article->user_id === $userId)
+            {
+                return response()->json([
+                    'meta' => [
+                        'code' => 200,
+                        'status' => 'success',
+                        'message' => 'Article Fetched Successfully.',
+                    ],
+                    'data' =>$article,
+                ]);
+            }
+
+            return response()->json([
+                'meta' => [
+                    'code' => 401,
+                    'status' => 'error',
+                    'message' => 'Unauthorized.',
+                ],
+                'data' => [],
+            ], 401);
+        }
+
+        return response()->json([
+            'meta' => [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Article Not Found.',
+            ],
+            'data' => [],
+        ], 404);
     }
 }
